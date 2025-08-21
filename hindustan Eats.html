@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hindustan Eats</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="https://placehold.co/32x32/f97316/white?text=HE"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      :root {
+        --primary-orange: #f97316;
+        --primary-green: #16a34a;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        font-family: "Inter", sans-serif;
+      }
+      .hero-bg {
+        background-image: linear-gradient(
+            rgba(0, 0, 0, 0.6),
+            rgba(0, 0, 0, 0.6)
+          ),
+          url("https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=2070&auto=format&fit=crop");
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+      }
+      .cool-btn {
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+      .cool-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 7px 14px rgba(0, 0, 0, 0.1);
+      }
+      .restaurant-card {
+        cursor: pointer;
+        transition: transform 0.1s linear, box-shadow 0.3s ease;
+        transform-style: preserve-3d;
+      }
+      .restaurant-card:hover {
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2),
+          0 5px 10px rgba(0, 0, 0, 0.15);
+      }
+      #restaurant-list {
+        perspective: 1000px;
+      }
+      #search-input-container {
+        transition: box-shadow 0.3s ease-in-out;
+      }
+      #search-input-container.focused {
+        box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.3);
+      }
+      .fade-in-section {
+        opacity: 0;
+        transform: translateY(20px);
+        transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+      }
+      .fade-in-section.is-visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      .header-scrolled {
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+          0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      }
+      #mobile-menu {
+        transform: translateX(100%);
+        transition: transform 0.3s ease-in-out;
+      }
+      #mobile-menu.open {
+        transform: translateX(0);
+      }
+      .form-container {
+        background-image: linear-gradient(to top, #f3f4f6, #ffffff);
+      }
+      #cart-modal {
+        transition: opacity 0.3s ease-in-out;
+      }
+      #cart-sidebar {
+        transform: translateX(100%);
+        transition: transform 0.3s ease-in-out;
+      }
+      #cart-modal.open #cart-sidebar {
+        transform: translateX(0);
+      }
+      #message-box {
+        transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+        transform: translateY(-150%);
+        opacity: 0;
+      }
+      #message-box.show {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50">
+    <!-- Message Box -->
+    <div
+      id="message-box"
+      class="fixed top-5 right-5 bg-green-500 text-white py-3 px-5 rounded-lg shadow-lg z-[60]"
+    >
+      <p id="message-text"></p>
+    </div>
+
+    <!-- Header -->
+    <header
+      id="main-header"
+      class="bg-white sticky top-0 z-40 transition-shadow duration-300"
+    >
+      <nav
+        class="container mx-auto px-6 py-4 flex justify-between items-center"
+      >
+        <a href="#" id="home-link" class="text-3xl font-bold text-orange-500"
+          >Hindustan Eats</a
+        >
+        <div class="hidden md:flex items-center space-x-6">
+          <a
+            href="#restaurants-section"
+            class="nav-link text-gray-600 hover:text-orange-500 font-medium transition duration-300"
+            >Restaurants</a
+          >
+          <a
+            href="#"
+            id="partner-link"
+            class="nav-link text-gray-600 hover:text-orange-500 font-medium transition duration-300"
+            >Partner with Us</a
+          >
+        </div>
+        <div id="auth-links" class="flex items-center space-x-4">
+          <!-- Auth buttons will be injected here -->
+        </div>
+      </nav>
+    </header>
+
+    <!-- Mobile Menu -->
+    <div
+      id="mobile-menu"
+      class="fixed top-0 right-0 h-full w-64 bg-white shadow-lg z-50 p-6 md:hidden"
+    >
+      <button id="close-menu-button" class="absolute top-4 right-4 text-2xl">
+        &times;
+      </button>
+      <nav id="mobile-nav-links" class="mt-10 flex flex-col space-y-6">
+        <!-- Mobile nav links injected here -->
+      </nav>
+    </div>
+
+    <main id="main-content">
+      <!-- All pages will be rendered here -->
+    </main>
+
+    <!-- Cart Modal -->
+    <div
+      id="cart-modal"
+      class="hidden fixed inset-0 bg-black bg-opacity-50 z-50"
+    >
+      <div
+        id="cart-sidebar"
+        class="w-full max-w-md bg-white h-full shadow-lg ml-auto p-6 flex flex-col"
+      >
+        <div class="flex justify-between items-center border-b pb-4">
+          <h2 class="text-2xl font-bold">Your Cart</h2>
+          <button id="close-cart-button" class="text-2xl">&times;</button>
+        </div>
+        <div id="cart-items" class="flex-grow overflow-y-auto my-4"></div>
+        <div id="cart-summary" class="border-t pt-4"></div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-12">
+      <div class="container mx-auto px-6">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+          <div>
+            <h4 class="font-bold text-lg mb-4 text-orange-400">
+              Hindustan Eats
+            </h4>
+            <ul>
+              <li class="mb-2">
+                <a
+                  href="#"
+                  class="hover:text-orange-400 transition duration-300"
+                  >About Us</a
+                >
+              </li>
+              <li class="mb-2">
+                <a
+                  href="#"
+                  class="hover:text-orange-400 transition duration-300"
+                  >Careers</a
+                >
+              </li>
+              <li class="mb-2">
+                <a
+                  href="#"
+                  class="hover:text-orange-400 transition duration-300"
+                  >Press</a
+                >
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="font-bold text-lg mb-4 text-orange-400">Legal</h4>
+            <ul>
+              <li class="mb-2">
+                <a
+                  href="#"
+                  class="hover:text-orange-400 transition duration-300"
+                  >Terms & Conditions</a
+                >
+              </li>
+              <li class="mb-2">
+                <a
+                  href="#"
+                  class="hover:text-orange-400 transition duration-300"
+                  >Privacy Policy</a
+                >
+              </li>
+              <li class="mb-2">
+                <a
+                  href="#"
+                  class="hover:text-orange-400 transition duration-300"
+                  >Cookie Policy</a
+                >
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="font-bold text-lg mb-4 text-orange-400">
+              Partner With Us
+            </h4>
+            <ul>
+              <li class="mb-2">
+                <a
+                  href="#"
+                  class="hover:text-orange-400 transition duration-300"
+                  >For Restaurants</a
+                >
+              </li>
+              <li class="mb-2">
+                <a
+                  href="#"
+                  class="hover:text-orange-400 transition duration-300"
+                  >For Drivers</a
+                >
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="font-bold text-lg mb-4 text-orange-400">Follow Us</h4>
+            <div class="flex space-x-4">
+              <a
+                href="#"
+                class="text-2xl hover:text-orange-400 transition duration-300"
+                ><i class="fab fa-facebook-f"></i
+              ></a>
+              <a
+                href="#"
+                class="text-2xl hover:text-orange-400 transition duration-300"
+                ><i class="fab fa-twitter"></i
+              ></a>
+              <a
+                href="#"
+                class="text-2xl hover:text-orange-400 transition duration-300"
+                ><i class="fab fa-instagram"></i
+              ></a>
+            </div>
+          </div>
+        </div>
+        <div
+          class="border-t border-gray-700 mt-8 pt-6 text-center text-gray-400 text-sm"
+        >
+          &copy; 2025 Hindustan Eats. All rights reserved. Ahmedabad, Gujarat.
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        // --- DATA ---
+        const restaurants = [
+          {
+            id: 1,
+            name: "Yi Jing",
+            cuisine: "North Indian, Mughlai",
+            rating: 4.8,
+            deliveryTime: "40-45 min",
+            priceForOne: 2500,
+            image:
+              "https://images.unsplash.com/photo-1552566626-52f8b828add9?q=80&w=2070&auto=format&fit=crop",
+            menu: [
+              { id: 101, name: "Dal Bukhara", price: 950 },
+              { id: 102, name: "Murgh Malai Kebab", price: 1250 },
+              { id: 103, name: "Sikandari Raan", price: 2100 },
+            ],
+          },
+          {
+            id: 2,
+            name: "The Global Eatery",
+            cuisine: "Continental, Pan-Asian",
+            rating: 4.6,
+            deliveryTime: "35-40 min",
+            priceForOne: 1800,
+            image:
+              "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=2070&auto=format&fit=crop",
+            menu: [
+              { id: 201, name: "Wild Mushroom Risotto", price: 850 },
+              { id: 202, name: "Grilled Salmon", price: 1500 },
+              { id: 203, name: "Thai Green Curry", price: 750 },
+            ],
+          },
+          {
+            id: 3,
+            name: "Sphere Lounge",
+            cuisine: "Lounge, Finger Food",
+            rating: 4.3,
+            deliveryTime: "30-35 min",
+            priceForOne: 1500,
+            image:
+              "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=1974&auto=format&fit=crop",
+            menu: [
+              { id: 301, name: "Mezze Platter", price: 650 },
+              { id: 302, name: "Spicy Chicken Wings", price: 550 },
+              { id: 303, name: "Truffle Fries", price: 400 },
+            ],
+          },
+          {
+            id: 4,
+            name: "@Mango",
+            cuisine: "Italian, Indian, Asian",
+            rating: 3.5,
+            deliveryTime: "15-20 min",
+            priceForOne: 1500,
+            image:
+              "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/17/c5/f3/73/mango.jpg?w=1200&h=-1&s=1",
+            menu: [
+              { id: 401, name: "Margherita Pizza", price: 750 },
+              { id: 402, name: "Paneer Tikka", price: 650 },
+              { id: 403, name: "Hakka Noodles", price: 500 },
+            ],
+          },
+          {
+            id: 5,
+            name: "Bayleaf",
+            cuisine: "North Indian",
+            rating: 4.8,
+            deliveryTime: "40-45 min",
+            priceForOne: 2500,
+            image:
+              "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/13/82/c0/92/bayleaf.jpg?w=1400&h=800&s=1",
+            menu: [
+              { id: 501, name: "Butter Chicken", price: 1150 },
+              { id: 502, name: "Garlic Naan", price: 250 },
+              { id: 503, name: "Mutton Rogan Josh", price: 1350 },
+            ],
+          },
+          {
+            id: 6,
+            name: "MoMo Cafe",
+            cuisine: "Indian, Cafe, International, Asian",
+            rating: 4.8,
+            deliveryTime: "40-45 min",
+            priceForOne: 2500,
+            image:
+              "https://dynamic-media-cdn.tripadvisor.com/media/photo-s/02/f5/71/e7/getlstd-property-photo.jpg?w=600&h=400&s=1",
+            menu: [
+              { id: 601, name: "Club Sandwich", price: 600 },
+              { id: 602, name: "Cold Coffee", price: 450 },
+              { id: 603, name: "Caesar Salad", price: 550 },
+            ],
+          },
+        ];
+
+        // --- APP STATE ---
+        let cart = [];
+        let currentRestaurantId = null;
+        let currentUser = null;
+        let users =
+          JSON.parse(localStorage.getItem("hindustan-eats-users")) || [];
+
+        // --- DOM ELEMENTS ---
+        const mainContent = document.getElementById("main-content");
+        const authLinksContainer = document.getElementById("auth-links");
+        const mobileNavLinks = document.getElementById("mobile-nav-links");
+        const mobileMenu = document.getElementById("mobile-menu");
+        const messageBox = document.getElementById("message-box");
+        const messageText = document.getElementById("message-text");
+        const cartModal = document.getElementById("cart-modal");
+
+        // --- TEMPLATES ---
+        const homepageTemplate = `
+                <div id="homepage">
+                    <section class="hero-bg text-white py-20 md:py-32">
+                        <div class="container mx-auto px-6 text-center">
+                            <h1 class="text-4xl md:text-6xl font-extrabold mb-4 leading-tight">Authentic Flavours, Delivered Fast.</h1>
+                            <p class="text-lg md:text-xl mb-8 text-gray-200">Discover the best local restaurants and enjoy a meal at home.</p>
+                            <div class="max-w-2xl mx-auto">
+                                <div id="search-input-container" class="flex items-center bg-white rounded-full shadow-lg overflow-hidden p-2">
+                                    <i class="fas fa-search text-gray-400 mx-3"></i>
+                                    <input id="search-input" type="text" placeholder="Search for restaurants..." class="w-full text-gray-800 py-3 px-2 focus:outline-none bg-transparent">
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    <section id="restaurants-section" class="py-16 fade-in-section">
+                        <div class="container mx-auto px-6">
+                            <h2 class="text-3xl font-bold text-center text-gray-800 mb-10">Our Restaurants</h2>
+                            <div id="restaurant-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+                        </div>
+                    </section>
+                </div>`;
+
+        const loginPageTemplate = `
+                <div id="login-page" class="py-16 form-container">
+                    <div class="container mx-auto px-6">
+                        <div class="max-w-md mx-auto bg-white rounded-lg shadow-xl p-8">
+                            <h2 class="text-3xl font-bold text-center text-gray-800 mb-6">Sign In</h2>
+                            <form id="login-form">
+                                <div class="mb-4">
+                                    <label class="block text-gray-700 text-sm font-bold mb-2" for="login-email">Email</label>
+                                    <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="login-email" type="email" placeholder="you@example.com" required>
+                                </div>
+                                <div class="mb-6">
+                                    <label class="block text-gray-700 text-sm font-bold mb-2" for="login-password">Password</label>
+                                    <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline" id="login-password" type="password" placeholder="******************" required>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <button class="bg-orange-500 text-white font-bold py-2 px-4 rounded-lg cool-btn w-full" type="submit">Sign In</button>
+                                </div>
+                                <p class="text-center text-gray-600 text-sm mt-6">Don't have an account? <a href="#" id="signup-link-from-login" class="text-green-600 font-bold hover:underline">Sign Up</a></p>
+                            </form>
+                        </div>
+                    </div>
+                </div>`;
+
+        const customerSignupPageTemplate = `
+                <div id="customer-signup-page" class="py-16 form-container">
+                     <div class="container mx-auto px-6">
+                        <div class="max-w-md mx-auto bg-white rounded-lg shadow-xl p-8">
+                            <h2 class="text-3xl font-bold text-center text-gray-800 mb-2">Create Your Account</h2>
+                            <p class="text-center text-gray-500 mb-6">Order from the best restaurants near you.</p>
+                            <form id="customer-signup-form">
+                                <div class="mb-4">
+                                    <label class="block text-gray-700 text-sm font-bold mb-2" for="signup-name">Full Name</label>
+                                    <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" id="signup-name" type="text" placeholder="John Doe" required>
+                                </div>
+                                <div class="mb-4">
+                                    <label class="block text-gray-700 text-sm font-bold mb-2" for="signup-email">Email</label>
+                                    <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" id="signup-email" type="email" placeholder="you@example.com" required>
+                                </div>
+                                <div class="mb-6">
+                                    <label class="block text-gray-700 text-sm font-bold mb-2" for="signup-password">Password</label>
+                                    <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" id="signup-password" type="password" placeholder="******************" required>
+                                </div>
+                                <button class="bg-orange-500 text-white font-bold py-2 px-4 rounded-lg cool-btn w-full" type="submit">Create Account</button>
+                                <p class="text-center text-gray-600 text-sm mt-6">Are you a restaurant? <a href="#" id="partner-link-from-signup" class="text-green-600 font-bold hover:underline">Partner with us</a></p>
+                            </form>
+                        </div>
+                    </div>
+                </div>`;
+
+        const restaurantSignupPageTemplate = `
+                <div id="restaurant-signup-page" class="py-16 form-container">
+                    <div class="container mx-auto px-6">
+                        <div class="max-w-lg mx-auto bg-white rounded-lg shadow-xl p-8">
+                            <h2 class="text-3xl font-bold text-center text-gray-800 mb-2">Partner with Hindustan Eats</h2>
+                            <p class="text-center text-gray-500 mb-6">Reach more customers and grow your business.</p>
+                            <form id="restaurant-signup-form">
+                                <div class="mb-4">
+                                    <label class="block text-gray-700 text-sm font-bold mb-2" for="signup-name">Restaurant Name</label>
+                                    <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" id="signup-name" type="text" placeholder="e.g. The Golden Spoon" required>
+                                </div>
+                                <div class="mb-4">
+                                    <label class="block text-gray-700 text-sm font-bold mb-2" for="signup-email">Business Email</label>
+                                    <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" id="signup-email" type="email" placeholder="owner@example.com" required>
+                                </div>
+                                <div class="mb-6">
+                                    <label class="block text-gray-700 text-sm font-bold mb-2" for="signup-password">Password</label>
+                                    <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" id="signup-password" type="password" placeholder="******************" required>
+                                </div>
+                                <button class="bg-green-600 text-white font-bold py-2 px-4 rounded-lg cool-btn w-full" type="submit">Submit Application</button>
+                                 <p class="text-center text-gray-600 text-sm mt-6">Just ordering food? <a href="#" id="customer-link-from-partner" class="text-orange-500 font-bold hover:underline">Create a customer account</a></p>
+                            </form>
+                        </div>
+                    </div>
+                </div>`;
+
+        // --- NEW: Restaurant Menu Page Template ---
+        const restaurantMenuPageTemplate = (r) => `
+            <div id="restaurant-menu-page">
+                <section class="h-64 md:h-80 relative" style="background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('${
+                  r.image
+                }'); background-size: cover; background-position: center;">
+                    <div class="absolute inset-0 flex items-end p-6 md:p-12">
+                        <div class="text-white">
+                            <h1 class="text-4xl md:text-5xl font-extrabold">${
+                              r.name
+                            }</h1>
+                            <p class="text-lg text-gray-200 mt-2">${
+                              r.cuisine
+                            }</p>
+                            <div class="flex items-center space-x-4 mt-4 text-sm">
+                                <span class="font-semibold bg-green-600 px-2 py-1 rounded"><i class="fas fa-star text-white mr-1"></i> ${
+                                  r.rating
+                                }</span>
+                                <span class="text-gray-200"><i class="fas fa-clock mr-1"></i> ${
+                                  r.deliveryTime
+                                }</span>
+                                <span class="text-gray-200">₹${
+                                  r.priceForOne
+                                } for one</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <section class="py-12">
+                    <div class="container mx-auto px-6">
+                        <h2 class="text-3xl font-bold text-gray-800 mb-8">Menu</h2>
+                        <div id="menu-items-list" class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            ${r.menu
+                              .map(
+                                (item) => `
+                                <div class="flex justify-between items-center p-4 border rounded-lg bg-white shadow-sm">
+                                    <div>
+                                        <h4 class="font-bold text-lg">${item.name}</h4>
+                                        <p class="text-gray-600">₹${item.price}</p>
+                                    </div>
+                                    <button data-item-id="${item.id}" data-restaurant-id="${r.id}" class="add-to-cart-btn bg-orange-100 text-orange-600 font-bold py-2 px-4 rounded-lg hover:bg-orange-500 hover:text-white transition duration-300">
+                                        ADD
+                                    </button>
+                                </div>
+                            `
+                              )
+                              .join("")}
+                        </div>
+                    </div>
+                </section>
+            </div>
+        `;
+
+        // --- RENDER FUNCTIONS ---
+        const renderPage = (template) => {
+          mainContent.innerHTML = template;
+          observeSections();
+        };
+
+        const renderAuthLinks = () => {
+          let desktopLinks, mobileLinks;
+          const cartItemCount = cart.reduce(
+            (sum, item) => sum + item.quantity,
+            0
+          );
+
+          if (currentUser) {
+            desktopLinks = `
+                        <span class="hidden md:block font-semibold text-gray-700">Welcome, ${
+                          currentUser.name.split(" ")[0]
+                        }!</span>
+                        <button id="logout-btn" class="hidden md:block bg-transparent text-gray-800 font-semibold py-2 px-4 rounded-lg hover:bg-gray-100">Logout</button>
+                    `;
+            mobileLinks = `
+                        <span class="text-gray-800 text-lg font-semibold">Welcome, ${
+                          currentUser.name.split(" ")[0]
+                        }!</span>
+                        <a href="#" id="logout-link-mobile" class="text-gray-800 hover:text-orange-500 text-lg">Logout</a>
+                    `;
+          } else {
+            desktopLinks = `
+                        <button id="signin-btn-nav" class="hidden md:block bg-transparent text-gray-800 font-semibold py-2 px-4 rounded-lg hover:bg-gray-100">Sign In</button>
+                        <button id="signup-btn-nav" class="hidden md:block bg-orange-500 text-white font-semibold py-2 px-4 rounded-lg cool-btn">Sign Up</button>
+                    `;
+            mobileLinks = `
+                        <a href="#" id="signin-link-mobile" class="text-gray-800 hover:text-orange-500 text-lg">Sign In</a>
+                        <a href="#" id="signup-link-mobile" class="text-gray-800 hover:text-orange-500 text-lg">Sign Up</a>
+                    `;
+          }
+
+          authLinksContainer.innerHTML = `
+                    ${desktopLinks}
+                    <button id="cart-button" class="relative text-gray-800 font-semibold py-2 px-4 rounded-lg hover:bg-gray-100 transition duration-300">
+                        <i class="fas fa-shopping-cart text-xl"></i>
+                        <span id="cart-count" class="absolute -top-2 -right-2 bg-orange-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">${cartItemCount}</span>
+                    </button>
+                    <button id="hamburger-button" class="md:hidden text-gray-800 text-2xl"><i class="fas fa-bars"></i></button>
+                `;
+
+          mobileNavLinks.innerHTML = `
+                    <a href="#restaurants-section" class="nav-link text-gray-800 hover:text-orange-500 text-lg">Restaurants</a>
+                    <a href="#" id="partner-link-mobile" class="nav-link text-gray-800 hover:text-orange-500 text-lg">Partner with Us</a>
+                    <hr/>
+                    ${mobileLinks}
+                `;
+          addAuthNavListeners();
+        };
+
+        const renderRestaurantCard = (r) => `
+                <div class="bg-white rounded-lg shadow-lg overflow-hidden restaurant-card" data-id="${r.id}">
+                    <img src="${r.image}" alt="${r.name}" class="w-full h-48 object-cover" onerror="this.onerror=null;this.src='https://placehold.co/600x400/cccccc/ffffff?text=Image+Not+Found';">
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-2 truncate">${r.name}</h3>
+                        <p class="text-gray-600 mb-4"><i class="fas fa-utensils mr-2" style="color: var(--primary-green);"></i> ${r.cuisine}</p>
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="font-semibold text-white bg-green-600 px-2 py-1 rounded"><i class="fas fa-star text-white mr-1"></i> ${r.rating}</span>
+                            <span class="text-gray-500"><i class="fas fa-clock mr-1"></i> ${r.deliveryTime}</span>
+                            <span class="text-gray-500">₹${r.priceForOne} for one</span>
+                        </div>
+                    </div>
+                </div>`;
+
+        const renderAllRestaurants = (restaurantsToRender) => {
+          const restaurantList = document.getElementById("restaurant-list");
+          if (!restaurantList) return;
+          restaurantList.innerHTML = restaurantsToRender
+            .map(renderRestaurantCard)
+            .join("");
+
+          restaurantList
+            .querySelectorAll(".restaurant-card")
+            .forEach((card) => {
+              card.addEventListener("click", (e) =>
+                showPage("menu", parseInt(e.currentTarget.dataset.id))
+              );
+            });
+
+          initCardTilt();
+        };
+
+        // --- NEW: Cart Rendering ---
+        const renderCart = () => {
+          const cartItemsContainer = document.getElementById("cart-items");
+          const cartSummaryContainer = document.getElementById("cart-summary");
+
+          if (cart.length === 0) {
+            cartItemsContainer.innerHTML = `<p class="text-gray-500 text-center my-8">Your cart is empty.</p>`;
+            cartSummaryContainer.innerHTML = "";
+            return;
+          }
+
+          cartItemsContainer.innerHTML = cart
+            .map(
+              (item) => `
+                <div class="flex justify-between items-center py-3 border-b last:border-b-0">
+                    <div>
+                        <p class="font-semibold">${item.name}</p>
+                        <p class="text-sm text-gray-500">₹${item.price}</p>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <button data-item-id="${
+                          item.id
+                        }" class="cart-quantity-btn cart-decrease">-</button>
+                        <span class="font-bold">${item.quantity}</span>
+                        <button data-item-id="${
+                          item.id
+                        }" class="cart-quantity-btn cart-increase">+</button>
+                    </div>
+                    <p class="font-bold">₹${item.price * item.quantity}</p>
+                </div>
+            `
+            )
+            .join("");
+
+          const subtotal = cart.reduce(
+            (sum, item) => sum + item.price * item.quantity,
+            0
+          );
+          const tax = subtotal * 0.05; // 5% GST
+          const deliveryFee = 50;
+          const total = subtotal + tax + deliveryFee;
+
+          cartSummaryContainer.innerHTML = `
+                <div class="space-y-2">
+                    <div class="flex justify-between"><span>Subtotal</span><span>₹${subtotal.toFixed(
+                      2
+                    )}</span></div>
+                    <div class="flex justify-between"><span>Taxes & Charges</span><span>₹${tax.toFixed(
+                      2
+                    )}</span></div>
+                    <div class="flex justify-between"><span>Delivery Fee</span><span>₹${deliveryFee.toFixed(
+                      2
+                    )}</span></div>
+                    <div class="flex justify-between font-bold text-lg border-t pt-2 mt-2"><span>To Pay</span><span>₹${total.toFixed(
+                      2
+                    )}</span></div>
+                </div>
+                <button class="w-full bg-green-600 text-white font-bold py-3 rounded-lg mt-6 cool-btn">Proceed to Checkout</button>
+            `;
+
+          addCartItemListeners();
+        };
+
+        // --- LOGIC & EVENT HANDLERS ---
+        const showMessage = (text, isSuccess = true) => {
+          messageText.textContent = text;
+          messageBox.className = `fixed top-5 right-5 text-white py-3 px-5 rounded-lg shadow-lg z-[60] ${
+            isSuccess ? "bg-green-500" : "bg-red-500"
+          }`;
+          messageBox.classList.add("show");
+          setTimeout(() => {
+            messageBox.classList.remove("show");
+          }, 3000);
+        };
+
+        const handleSignUp = (e) => {
+          e.preventDefault();
+          const form = e.target;
+          const name = form.querySelector("#signup-name").value;
+          const email = form.querySelector("#signup-email").value;
+          const password = form.querySelector("#signup-password").value;
+          const userType =
+            form.id === "customer-signup-form" ? "customer" : "partner";
+
+          if (users.find((u) => u.email === email)) {
+            showMessage("An account with this email already exists.", false);
+            return;
+          }
+
+          const newUser = { name, email, password, userType };
+          users.push(newUser);
+          localStorage.setItem("hindustan-eats-users", JSON.stringify(users));
+
+          showMessage("Account created successfully! Please sign in.");
+          showPage("login");
+        };
+
+        const handleSignIn = (e) => {
+          e.preventDefault();
+          const email = e.target.querySelector("#login-email").value;
+          const password = e.target.querySelector("#login-password").value;
+
+          const user = users.find(
+            (u) => u.email === email && u.password === password
+          );
+          if (user) {
+            currentUser = user;
+            sessionStorage.setItem(
+              "hindustan-eats-currentUser",
+              JSON.stringify(user)
+            );
+            renderAuthLinks();
+            showPage("home");
+            showMessage(`Welcome back, ${user.name.split(" ")[0]}!`);
+          } else {
+            showMessage("Invalid email or password.", false);
+          }
+        };
+
+        const handleLogout = () => {
+          currentUser = null;
+          sessionStorage.removeItem("hindustan-eats-currentUser");
+          renderAuthLinks();
+          showPage("home");
+          showMessage("You have been logged out.");
+        };
+
+        // --- NEW: Cart Logic ---
+        const updateCart = () => {
+          renderAuthLinks(); // Updates the cart count in the header
+          renderCart(); // Re-renders the content of the cart modal
+        };
+
+        const handleAddToCart = (e) => {
+          if (!currentUser) {
+            showMessage("Please sign in to add items to your cart.", false);
+            showPage("login");
+            return;
+          }
+
+          const button = e.target;
+          const itemId = parseInt(button.dataset.itemId);
+          const restaurantId = parseInt(button.dataset.restaurantId);
+
+          if (cart.length > 0 && currentRestaurantId !== restaurantId) {
+            showMessage(
+              "You can only order from one restaurant at a time. Please clear your cart first.",
+              false
+            );
+            openCartModal();
+            return;
+          }
+
+          currentRestaurantId = restaurantId;
+
+          const restaurant = restaurants.find((r) => r.id === restaurantId);
+          const menuItem = restaurant.menu.find((item) => item.id === itemId);
+
+          const existingCartItem = cart.find((item) => item.id === itemId);
+
+          if (existingCartItem) {
+            existingCartItem.quantity++;
+          } else {
+            cart.push({ ...menuItem, quantity: 1 });
+          }
+
+          showMessage(`${menuItem.name} added to cart!`);
+          updateCart();
+        };
+
+        const handleCartQuantityChange = (itemId, change) => {
+          const cartItem = cart.find((item) => item.id === itemId);
+          if (!cartItem) return;
+
+          cartItem.quantity += change;
+
+          if (cartItem.quantity <= 0) {
+            cart = cart.filter((item) => item.id !== itemId);
+            if (cart.length === 0) {
+              currentRestaurantId = null;
+            }
+          }
+          updateCart();
+        };
+
+        const openCartModal = () => {
+          renderCart();
+          cartModal.classList.remove("hidden");
+          cartModal.classList.add("open");
+        };
+
+        const closeCartModal = () => {
+          cartModal.classList.remove("open");
+          // Use a timeout to allow the animation to finish before hiding
+          setTimeout(() => {
+            cartModal.classList.add("hidden");
+          }, 300);
+        };
+
+        // --- NAVIGATION & INITIALIZATION ---
+        const showPage = (pageName, data) => {
+          window.scrollTo(0, 0);
+
+          switch (pageName) {
+            case "home":
+              renderPage(homepageTemplate);
+              renderAllRestaurants(restaurants);
+              const searchInput = document.getElementById("search-input");
+              const searchContainer = document.getElementById(
+                "search-input-container"
+              );
+
+              searchInput.addEventListener("input", (e) => {
+                const query = e.target.value.toLowerCase();
+                const filtered = restaurants.filter(
+                  (r) =>
+                    r.name.toLowerCase().includes(query) ||
+                    r.cuisine.toLowerCase().includes(query)
+                );
+                renderAllRestaurants(filtered);
+              });
+
+              searchInput.addEventListener("focus", () =>
+                searchContainer.classList.add("focused")
+              );
+              searchInput.addEventListener("blur", () =>
+                searchContainer.classList.remove("focused")
+              );
+
+              break;
+            case "login":
+              renderPage(loginPageTemplate);
+              document
+                .getElementById("login-form")
+                .addEventListener("submit", handleSignIn);
+              document
+                .getElementById("signup-link-from-login")
+                .addEventListener("click", () => showPage("signup"));
+              break;
+            case "signup":
+              renderPage(customerSignupPageTemplate);
+              document
+                .getElementById("customer-signup-form")
+                .addEventListener("submit", handleSignUp);
+              document
+                .getElementById("partner-link-from-signup")
+                .addEventListener("click", () => showPage("partnerSignup"));
+              break;
+            case "partnerSignup":
+              renderPage(restaurantSignupPageTemplate);
+              document
+                .getElementById("restaurant-signup-form")
+                .addEventListener("submit", handleSignUp);
+              document
+                .getElementById("customer-link-from-partner")
+                .addEventListener("click", () => showPage("signup"));
+              break;
+            // --- NEW: Menu Page Case ---
+            case "menu":
+              const restaurant = restaurants.find((r) => r.id === data);
+              if (restaurant) {
+                renderPage(restaurantMenuPageTemplate(restaurant));
+                document.querySelectorAll(".add-to-cart-btn").forEach((btn) => {
+                  btn.addEventListener("click", handleAddToCart);
+                });
+              } else {
+                showPage("home"); // Fallback to home if restaurant not found
+              }
+              break;
+          }
+        };
+
+        const addAuthNavListeners = () => {
+          document
+            .getElementById("home-link")
+            .addEventListener("click", (e) => {
+              e.preventDefault();
+              showPage("home");
+            });
+          document
+            .getElementById("partner-link")
+            .addEventListener("click", (e) => {
+              e.preventDefault();
+              showPage("partnerSignup");
+            });
+
+          document
+            .getElementById("signin-btn-nav")
+            ?.addEventListener("click", () => showPage("login"));
+          document
+            .getElementById("signup-btn-nav")
+            ?.addEventListener("click", () => showPage("signup"));
+          document
+            .getElementById("logout-btn")
+            ?.addEventListener("click", handleLogout);
+
+          document
+            .getElementById("hamburger-button")
+            .addEventListener("click", () => mobileMenu.classList.add("open"));
+          document
+            .getElementById("close-menu-button")
+            .addEventListener("click", () =>
+              mobileMenu.classList.remove("open")
+            );
+
+          mobileMenu
+            .querySelectorAll(".nav-link")
+            .forEach((link) =>
+              link.addEventListener("click", () =>
+                mobileMenu.classList.remove("open")
+              )
+            );
+          document
+            .getElementById("partner-link-mobile")
+            ?.addEventListener("click", (e) => {
+              e.preventDefault();
+              mobileMenu.classList.remove("open");
+              showPage("partnerSignup");
+            });
+          document
+            .getElementById("signin-link-mobile")
+            ?.addEventListener("click", (e) => {
+              e.preventDefault();
+              mobileMenu.classList.remove("open");
+              showPage("login");
+            });
+          document
+            .getElementById("signup-link-mobile")
+            ?.addEventListener("click", (e) => {
+              e.preventDefault();
+              mobileMenu.classList.remove("open");
+              showPage("signup");
+            });
+          document
+            .getElementById("logout-link-mobile")
+            ?.addEventListener("click", (e) => {
+              e.preventDefault();
+              mobileMenu.classList.remove("open");
+              handleLogout();
+            });
+
+          // Cart button listener
+          document
+            .getElementById("cart-button")
+            .addEventListener("click", openCartModal);
+        };
+
+        // --- NEW: Add listeners for cart items ---
+        const addCartItemListeners = () => {
+          document.querySelectorAll(".cart-increase").forEach((btn) => {
+            btn.addEventListener("click", (e) =>
+              handleCartQuantityChange(parseInt(e.target.dataset.itemId), 1)
+            );
+          });
+          document.querySelectorAll(".cart-decrease").forEach((btn) => {
+            btn.addEventListener("click", (e) =>
+              handleCartQuantityChange(parseInt(e.target.dataset.itemId), -1)
+            );
+          });
+        };
+
+        const observeSections = () => {
+          const sections = document.querySelectorAll(".fade-in-section");
+          const observer = new IntersectionObserver(
+            (entries) => {
+              entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                  entry.target.classList.add("is-visible");
+                  observer.unobserve(entry.target);
+                }
+              });
+            },
+            { threshold: 0.1 }
+          );
+          sections.forEach((section) => observer.observe(section));
+        };
+
+        const initCardTilt = () => {
+          const cards = document.querySelectorAll(".restaurant-card");
+          cards.forEach((card) => {
+            card.addEventListener("mousemove", (e) => {
+              const rect = card.getBoundingClientRect();
+              const x = e.clientX - rect.left;
+              const y = e.clientY - rect.top;
+              const width = card.offsetWidth;
+              const height = card.offsetHeight;
+
+              const rotateX = -(height / 2 - y) / 20;
+              const rotateY = (width / 2 - x) / 20;
+
+              card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
+            });
+
+            card.addEventListener("mouseleave", () => {
+              card.style.transform = "rotateX(0) rotateY(0) scale(1)";
+            });
+          });
+        };
+
+        const init = () => {
+          const loggedInUser = sessionStorage.getItem(
+            "hindustan-eats-currentUser"
+          );
+          if (loggedInUser) {
+            currentUser = JSON.parse(loggedInUser);
+          }
+          renderAuthLinks();
+          showPage("home");
+
+          window.onscroll = () =>
+            document
+              .getElementById("main-header")
+              .classList.toggle("header-scrolled", window.pageYOffset > 50);
+
+          // Cart modal close listeners
+          document
+            .getElementById("close-cart-button")
+            .addEventListener("click", closeCartModal);
+          cartModal.addEventListener("click", (e) => {
+            if (e.target.id === "cart-modal") {
+              closeCartModal();
+            }
+          });
+        };
+
+        init();
+      });
+    </script>
+  </body>
+</html>
